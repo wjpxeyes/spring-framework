@@ -11,8 +11,6 @@ import lombok.ToString;
 @AllArgsConstructor
 public class UserService {
     private String name;
-    private Integer age;
-    private Long time;
 
     public void test() {
         System.out.println("我是user");
