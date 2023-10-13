@@ -12,6 +12,8 @@ import lombok.ToString;
 public class UserService {
     private String name;
 
+    private UserDao userDao;
+
     public void test() {
         System.out.println("我是user");
     }
