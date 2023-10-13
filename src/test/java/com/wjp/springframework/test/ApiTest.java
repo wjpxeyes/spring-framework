@@ -1,39 +1,88 @@
 package com.wjp.springframework.test;
 
-import com.wjp.springframework.beans.PropertyValue;
-import com.wjp.springframework.beans.PropertyValues;
-import com.wjp.springframework.beans.factory.config.BeanDefinition;
-import com.wjp.springframework.beans.factory.config.BeanReference;
+import cn.hutool.core.io.IoUtil;
 import com.wjp.springframework.beans.factory.support.DefaultListableBeanFactory;
-import com.wjp.springframework.test.bean.UserDao;
+import com.wjp.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import com.wjp.springframework.core.io.DefaultResourceLoader;
+import com.wjp.springframework.core.io.Resource;
 import com.wjp.springframework.test.bean.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class ApiTest {
-//    第四次测试的代码
+    private DefaultResourceLoader resourceLoader;
+
+    @BeforeEach
+    public void init() {
+        resourceLoader = new DefaultResourceLoader();
+    }
+
+    @Test
+    public void test_classpath() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:important.properties");
+        InputStream inputStream = resource.getInputStream();
+        String content = IoUtil.readUtf8(inputStream);
+        System.out.println(content);
+    }
+
+    @Test
+    public void test_file() throws IOException {
+        Resource resource = resourceLoader.getResource("src/main/resources/important.properties");
+        InputStream inputStream = resource.getInputStream();
+        String content = IoUtil.readUtf8(inputStream);
+        System.out.println(content);
+    }
+
+    @Test
+    public void test_url() throws IOException {
+        // 网络原因可能导致GitHub不能读取，可以放到自己的Gitee仓库。读取后可以从内容中搜索关键字；OLpj9823dZ
+        Resource resource = resourceLoader.getResource("https://github.com/fuzhengwei/small-spring/blob/main/important.properties");
+        InputStream inputStream = resource.getInputStream();
+        String content = IoUtil.readUtf8(inputStream);
+        System.out.println(content);
+    }
+
 
     @Test
     void testBeanFactory() {
-        // 1.创建bean工厂
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        // 2. 注入bean
-        // 2.1 userdao注册
-        PropertyValues propertyValues = new PropertyValues();
-        propertyValues.addPropertyValue(new PropertyValue("userId", 13));
-        propertyValues.addPropertyValue(new PropertyValue("name", "王景鹏"));
-        factory.registryBeanDefinition("userDao", new BeanDefinition(UserDao.class, propertyValues));
-        // 2.2 userService注册
-        PropertyValues values = new PropertyValues();
-        values.addPropertyValue(new PropertyValue("name", "王景鹏1111"));
-        values.addPropertyValue(new PropertyValue("userDao", new BeanReference("userDao")));
-        factory.registryBeanDefinition("userService", new BeanDefinition(UserService.class, values));
-        // 3.获取bean
+
+        // 2. 读取配置文件&注册Bean
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+        reader.loadBeanDefinitions("classpath:spring.xml");
+
         Object userDao = factory.getBean("userDao");
         System.out.println(userDao);
         UserService userService = (UserService) factory.getBean("userService");
         System.out.println(userService);
         userService.test();
     }
+    //    第四次测试的代码
+//    @Test
+//    void testBeanFactory() {
+//        // 1.创建bean工厂
+//        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+//        // 2. 注入bean
+//        // 2.1 userdao注册
+//        PropertyValues propertyValues = new PropertyValues();
+//        propertyValues.addPropertyValue(new PropertyValue("userId", 13));
+//        propertyValues.addPropertyValue(new PropertyValue("name", "王景鹏"));
+//        factory.registerBeanDefinition("userDao", new BeanDefinition(UserDao.class, propertyValues));
+//        // 2.2 userService注册
+//        PropertyValues values = new PropertyValues();
+//        values.addPropertyValue(new PropertyValue("name", "王景鹏1111"));
+//        values.addPropertyValue(new PropertyValue("userDao", new BeanReference("userDao")));
+//        factory.registerBeanDefinition("userService", new BeanDefinition(UserService.class, values));
+//        // 3.获取bean
+//        Object userDao = factory.getBean("userDao");
+//        System.out.println(userDao);
+//        UserService userService = (UserService) factory.getBean("userService");
+//        System.out.println(userService);
+//        userService.test();
+//    }
 
 
 //    第一次的测试代码

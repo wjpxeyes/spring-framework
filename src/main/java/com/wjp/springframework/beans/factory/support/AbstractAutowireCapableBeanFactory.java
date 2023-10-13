@@ -1,10 +1,10 @@
 package com.wjp.springframework.beans.factory.support;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.wjp.springframework.beans.BeansException;
 import com.wjp.springframework.beans.PropertyValue;
 import com.wjp.springframework.beans.factory.config.BeanDefinition;
 import com.wjp.springframework.beans.factory.config.BeanReference;
-import com.wjp.springframework.util.BeanUtil;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
