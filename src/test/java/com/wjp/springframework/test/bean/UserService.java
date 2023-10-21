@@ -10,11 +10,12 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserService {
-    private String name;
-
+    private String uId;
+    private String company;
+    private String location;
     private UserDao userDao;
 
-    public void test() {
-        System.out.println("我是user");
+    public String queryUserInfo() {
+        return userDao.queryUserName(uId) + ", 公司：" + company + ", 地点" + location;
     }
 }
