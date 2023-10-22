@@ -9,5 +9,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
      * @throws BeansException
      * @throws IllegalStateException
      */
-    void refresh() throws BeansException, IllegalStateException;
+    void refresh() throws BeansException;
+
+    void registerShutdownHook();
+
+    void close();
 }

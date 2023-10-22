@@ -26,6 +26,7 @@ public abstract class DefaultSingletonBeanRegistry implements SingletonBeanRegis
         disposableBeans.put(beanName, bean);
     }
 
+
     public void destroySingletons() {
         Set<String> keySet = this.disposableBeans.keySet();
         Object[] disposableBeanNames = keySet.toArray();

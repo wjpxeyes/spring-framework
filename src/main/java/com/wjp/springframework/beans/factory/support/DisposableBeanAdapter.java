@@ -7,6 +7,9 @@ import com.wjp.springframework.beans.factory.config.BeanDefinition;
 
 import java.lang.reflect.Method;
 
+/**
+ * 销毁方法适配器(接口和配置)
+ */
 public class DisposableBeanAdapter implements DisposableBean {
 
     private final Object bean;
