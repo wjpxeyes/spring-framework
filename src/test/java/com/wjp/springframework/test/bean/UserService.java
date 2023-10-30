@@ -1,7 +1,12 @@
 package com.wjp.springframework.test.bean;
 
-import com.wjp.springframework.beans.factory.DisposableBean;
-import com.wjp.springframework.beans.factory.InitializingBean;
+import com.wjp.springframework.beans.BeansException;
+import com.wjp.springframework.beans.factory.BeanClassLoaderAware;
+import com.wjp.springframework.beans.factory.BeanFactory;
+import com.wjp.springframework.beans.factory.BeanFactoryAware;
+import com.wjp.springframework.beans.factory.BeanNameAware;
+import com.wjp.springframework.context.ApplicationContext;
+import com.wjp.springframework.context.ApplicationContextAware;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,23 +16,36 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserService implements InitializingBean, DisposableBean {
+public class UserService implements BeanNameAware, BeanClassLoaderAware, ApplicationContextAware, BeanFactoryAware {
+    private ApplicationContext applicationContext;
+    private BeanFactory beanFactory;
+
     private String uId;
     private String company;
     private String location;
     private UserDao userDao;
 
     @Override
-    public void destroy() throws Exception {
-        System.out.println("执行：UserService.destroy");
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.println("执行：UserService.afterPropertiesSet");
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        System.out.println("Bean Name is：" + name);
+    }
+
+    @Override
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        System.out.println("ClassLoader：" + classLoader);
     }
 
     public String queryUserInfo() {
-        return userDao.queryUserName(uId) + ", 公司：" + company + ", 地点" + location;
+        return userDao.queryUserName(uId) + "," + company + "," + location;
     }
 }
