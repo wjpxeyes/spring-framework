@@ -24,18 +24,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         try {
 //            bean = beanDefinition.getBeanClass().getDeclaredConstructor().newInstance();
             bean = createBeanInstance(beanName, beanDefinition, args);
+            applyPropertyValues(bean, beanDefinition);
+            bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
             throw new BeansException("创建bean错误");
         }
-        applyPropertyValues(bean, beanDefinition);
-        bean = initializeBean(beanName, bean, beanDefinition);
+
 
         registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
-        addSingleton(beanName, bean);
+        if (beanDefinition.isSingleton()) {
+            addSingleton(beanName, bean);
+        }
         return bean;
     }
 
     private void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        if (!beanDefinition.isSingleton()) return;
         if (bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
             registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
         }
