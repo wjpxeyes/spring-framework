@@ -2,20 +2,30 @@ package com.wjp.springframework.test;
 
 import com.wjp.springframework.context.support.ClassPathXmlApplicationContext;
 import com.wjp.springframework.test.bean.IUserService;
+import com.wjp.springframework.test.event.CustomEvent;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jol.info.ClassLayout;
 
 public class ApiTest {
     @Test
-    public void test_factory_bean() {
-        // 1.初始化 BeanFactory
-        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring1.xml");
-        applicationContext.registerShutdownHook();
+    public void test_event() {
+        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring2.xml");
+        applicationContext.publishEvent(new CustomEvent(applicationContext, 1019129009086763L, "成功了！"));
 
-        // 2. 调用代理方法
-        IUserService userService = applicationContext.getBean("userService", IUserService.class);
-        System.out.println("测试结果：" + userService.queryUserInfo());
+        applicationContext.registerShutdownHook();
     }
+
+
+//    @Test
+//    public void test_factory_bean() {
+//        // 1.初始化 BeanFactory
+//        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring1.xml");
+//        applicationContext.registerShutdownHook();
+//
+//        // 2. 调用代理方法
+//        IUserService userService = applicationContext.getBean("userService", IUserService.class);
+//        System.out.println("测试结果：" + userService.queryUserInfo());
+//    }
 
     @Test
     public void test_prototype() {
