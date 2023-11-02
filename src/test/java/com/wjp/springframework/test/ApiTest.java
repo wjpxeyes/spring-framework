@@ -1,19 +1,48 @@
 package com.wjp.springframework.test;
 
+import com.wjp.springframework.aop.AdvisedSupport;
+import com.wjp.springframework.aop.TargetSource;
+import com.wjp.springframework.aop.aspectj.AspectJExpressionPointcut;
+import com.wjp.springframework.aop.framework.Cglib2AopProxy;
+import com.wjp.springframework.aop.framework.JdkDynamicAopProxy;
 import com.wjp.springframework.context.support.ClassPathXmlApplicationContext;
-import com.wjp.springframework.test.bean.IUserService;
-import com.wjp.springframework.test.event.CustomEvent;
+import com.wjp.springframework.test.aopbean.IUserService;
+import com.wjp.springframework.test.aopbean.UserService;
+import com.wjp.springframework.test.aopbean.UserServiceInterceptor;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jol.info.ClassLayout;
 
 public class ApiTest {
     @Test
-    public void test_event() {
-        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring2.xml");
-        applicationContext.publishEvent(new CustomEvent(applicationContext, 1019129009086763L, "成功了！"));
+    public void test_dynamic() {
+        // 目标对象
+        IUserService userService = new UserService();
 
-        applicationContext.registerShutdownHook();
+        // 组装代理信息
+        AdvisedSupport advisedSupport = new AdvisedSupport();
+        advisedSupport.setTargetSource(new TargetSource(userService));
+        advisedSupport.setMethodInterceptor(new UserServiceInterceptor());
+        advisedSupport.setMethodMatcher(new AspectJExpressionPointcut("execution(* com.wjp.springframework.test.aopbean.IUserService.*(..))"));
+
+        // 代理对象(JdkDynamicAopProxy)
+        IUserService proxy_jdk = (IUserService) new JdkDynamicAopProxy(advisedSupport).getProxy();
+        // 测试调用
+        System.out.println("测试结果：" + proxy_jdk.queryUserInfo());
+
+        // 代理对象(Cglib2AopProxy)
+        IUserService proxy_cglib = (IUserService) new Cglib2AopProxy(advisedSupport).getProxy();
+        // 测试调用
+        System.out.println("测试结果：" + proxy_cglib.register("花花"));
     }
+
+
+//    @Test
+//    public void test_event() {
+//        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring2.xml");
+//        applicationContext.publishEvent(new CustomEvent(applicationContext, 1019129009086763L, "成功了！"));
+//
+//        applicationContext.registerShutdownHook();
+//    }
 
 
 //    @Test
