@@ -1,4 +1,5 @@
 package com.wjp.springframework.aop;
 
-public class PointcutAdvisor {
+public interface PointcutAdvisor extends Advisor {
+    Pointcut getPointcut();
 }
