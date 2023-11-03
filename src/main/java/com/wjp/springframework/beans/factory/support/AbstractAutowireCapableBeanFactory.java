@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.wjp.springframework.beans.BeansException;
 import com.wjp.springframework.beans.PropertyValue;
+import com.wjp.springframework.beans.PropertyValues;
 import com.wjp.springframework.beans.factory.*;
 import com.wjp.springframework.beans.factory.config.*;
 
@@ -23,8 +24,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (null != bean) {
                 return bean;
             }
-            
+
             bean = createBeanInstance(beanName, beanDefinition, args);
+
+            applyBeanPostProcessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
+
             applyPropertyValues(bean, beanDefinition);
             bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
@@ -37,6 +41,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             addSingleton(beanName, bean);
         }
         return bean;
+    }
+
+    protected void applyBeanPostProcessorsBeforeApplyingPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                PropertyValues pvs = ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessPropertyValues(beanDefinition.getPropertyValues(), bean, beanName);
+                if (null != pvs) {
+                    for (PropertyValue propertyValue : pvs.getPropertyValues()) {
+                        beanDefinition.getPropertyValues().addPropertyValue(propertyValue);
+                    }
+                }
+            }
+        }
     }
 
     protected Object resolveBeforeInstantiation(String beanName, BeanDefinition beanDefinition) {
