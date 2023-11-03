@@ -10,6 +10,10 @@ public class PropertyValues {
         propertyValueList.add(pv);
     }
 
+    public PropertyValue[] getPropertyValues() {
+        return this.propertyValueList.toArray(new PropertyValue[0]);
+    }
+
     public List<PropertyValue> getPropertyValueList() {
         return propertyValueList;
     }
