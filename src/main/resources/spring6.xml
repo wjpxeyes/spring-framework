@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+
+    <bean id="userService" class="com.wjp.springframework.test.autoaop.UserService">
+        <property name="token" value="RejDlI78hu223Opo983Ds"/>
+    </bean>
+
+    <bean class="com.wjp.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="beforeAdvice" class="com.wjp.springframework.test.autoaop.UserServiceBeforeAdvice"/>
+
+    <bean id="methodInterceptor"
+          class="com.wjp.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="advice" ref="beforeAdvice"/>
+    </bean>
+
+    <bean id="pointcutAdvisor" class="com.wjp.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* com.wjp.springframework.test.aopbean.IUserService.*(..))"/>
+        <property name="advice" ref="methodInterceptor"/>
+    </bean>
+
+</beans>

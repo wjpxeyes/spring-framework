@@ -10,7 +10,6 @@ import com.wjp.springframework.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.List;
 
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
@@ -24,23 +23,42 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (null != bean) {
                 return bean;
             }
-
+            //实例化bean
             bean = createBeanInstance(beanName, beanDefinition, args);
 
+            // 实例化后判断
+            boolean continueWithPropertyPopulation = applyBeanPostProcessorsAfterInstantiation(beanName, bean);
+            if (!continueWithPropertyPopulation) {
+                return bean;
+            }
+            // 在设置 Bean 属性之前，允许 BeanPostProcessor 修改属性值
             applyBeanPostProcessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
-
-            applyPropertyValues(bean, beanDefinition);
+            // 给 Bean 填充属性
+            applyPropertyValues(beanName, bean, beanDefinition);
+            // 执行 Bean 的初始化方法和 BeanPostProcessor 的前置和后置处理方法
             bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
-            throw new BeansException("创建bean错误");
+            throw new BeansException("创建bean错误" + e.getMessage());
         }
-
-
         registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
         if (beanDefinition.isSingleton()) {
             addSingleton(beanName, bean);
         }
         return bean;
+    }
+
+    private boolean applyBeanPostProcessorsAfterInstantiation(String beanName, Object bean) {
+        boolean continueWithPropertyPopulation = true;
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                InstantiationAwareBeanPostProcessor instantiationAwareBeanPostProcessor = (InstantiationAwareBeanPostProcessor) beanPostProcessor;
+                if (!instantiationAwareBeanPostProcessor.postProcessAfterInstantiation(bean, beanName)) {
+                    continueWithPropertyPopulation = false;
+                    break;
+                }
+            }
+        }
+        return continueWithPropertyPopulation;
     }
 
     protected void applyBeanPostProcessorsBeforeApplyingPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
@@ -91,21 +109,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
-    private void applyPropertyValues(Object bean, BeanDefinition beanDefinition) {
+    private void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
         try {
-            List<PropertyValue> propertyValueList = beanDefinition.getPropertyValues().getPropertyValueList();
-            for (PropertyValue pv : propertyValueList) {
-                String name = pv.getName();
-                Object value = pv.getValue();
+            PropertyValues propertyValues = beanDefinition.getPropertyValues();
+            for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
+
+                String name = propertyValue.getName();
+                Object value = propertyValue.getValue();
+
                 if (value instanceof BeanReference) {
+                    // A 依赖 B，获取 B 的实例化
                     BeanReference beanReference = (BeanReference) value;
                     value = getBean(beanReference.getBeanName());
                 }
-                BeanUtil.setFieldValue(bean, name, value);
 
+                // 属性填充
+                BeanUtil.setFieldValue(bean, name, value);
             }
         } catch (Exception e) {
-            throw new BeansException("填充bean属性失败" + bean);
+            throw new BeansException("错误填充bean属性：" + beanName);
         }
     }
 
