@@ -1,6 +1,8 @@
 package com.wjp.springframework.beans.factory.config;
 
+import com.sun.istack.internal.Nullable;
 import com.wjp.springframework.beans.factory.HierarchicalBeanFactory;
+import com.wjp.springframework.core.convert.ConversionService;
 import com.wjp.springframework.util.StringValueResolver;
 
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
@@ -15,14 +17,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
     void destroySingletons();
 
     void addEmbeddedValueResolver(StringValueResolver valueResolver);
-
-    /**
-     * Resolve the given embedded value, e.g. an annotation attribute.
-     *
-     * @param value the value to resolve
-     * @return the resolved value (may be the original value as-is)
-     * @since 3.0
-     */
+    
     String resolveEmbeddedValue(String value);
+
+    void setConversionService(ConversionService conversionService);
+
+    @Nullable
+    ConversionService getConversionService();
 
 }
